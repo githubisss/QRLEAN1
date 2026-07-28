@@ -1,0 +1,11 @@
+{
+  "name": "QRLEAN",
+  "description": "QR code-enabled, AI-assisted waste reporting and reward platform for India.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
