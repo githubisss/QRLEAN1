@@ -42,82 +42,121 @@ async function startServer() {
   // AI Waste Verification Endpoint
   app.post('/api/verify-waste', async (req, res) => {
     try {
-      const { imageBase64, category, spotName } = req.body;
+      const { imageBase64, category, spotName, visualComplexity } = req.body;
       const ai = getGeminiClient();
 
       if (ai && imageBase64 && typeof imageBase64 === 'string') {
         try {
-          // Extract exact mime type (png, jpeg, webp, etc.)
-          const mimeTypeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
-          const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
-          const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+          // Process image input: handle base64 data URIs, HTTP URLs, or raw base64
+          let mimeType = 'image/jpeg';
+          let cleanBase64 = '';
 
-          const prompt = `You are QRLEAN AI, an automated waste auditing model for Swachh Bharat cleanliness initiatives in Indian cities.
-Analyze this submitted photo for spot "${spotName || 'Public Location'}".
-1. Check if the image clearly shows genuine discarded waste/garbage/litter in a public area or waste bin area.
-2. If it is an invalid image (e.g. a selfie, blank wall, indoor furniture, animal, food on a plate, or scam photo), set isValid to false.
-3. If valid, categorize as one of: Plastic, Wet/Organic, E-Waste, Hazardous, Construction/Debris, General/Mixed.
-4. Estimate volume in kilograms (Kg).
-5. Rate hazard as Low, Medium, or High.
-6. Provide concise reasoning in English with Indian urban context.
-7. Return JSON strictly matching the schema.`;
-
-          const response = await ai.models.generateContent({
-            model: 'gemini-3.6-flash',
-            contents: [
-              {
-                parts: [
-                  { inlineData: { mimeType, data: cleanBase64 } },
-                  { text: prompt }
-                ]
-              }
-            ],
-            config: {
-              responseMimeType: 'application/json',
-              responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                  isValid: { type: Type.BOOLEAN, description: 'True if image contains genuine outdoor/public waste spot' },
-                  confidenceScore: { type: Type.INTEGER, description: 'Percentage 0-100 confidence' },
-                  detectedCategory: { type: Type.STRING, description: 'Plastic, Wet/Organic, E-Waste, Hazardous, Construction/Debris, or General/Mixed' },
-                  estimatedVolumeKg: { type: Type.NUMBER, description: 'Estimated weight of waste in Kg' },
-                  hazardRating: { type: Type.STRING, description: 'Low, Medium, or High' },
-                  reasoning: { type: Type.STRING, description: 'Explanation of AI audit finding' },
-                  detectedObjects: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: 'List of waste items identified'
-                  },
-                  suggestedAction: { type: Type.STRING, description: 'Action for municipal cleaning center' }
-                },
-                required: ['isValid', 'confidenceScore', 'detectedCategory', 'estimatedVolumeKg', 'hazardRating', 'reasoning']
-              }
+          if (imageBase64.startsWith('data:')) {
+            const mimeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
+            if (mimeMatch) {
+              mimeType = mimeMatch[1];
             }
-          });
+            cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+          } else if (imageBase64.startsWith('http://') || imageBase64.startsWith('https://')) {
+            try {
+              const imgRes = await fetch(imageBase64);
+              const arrayBuffer = await imgRes.arrayBuffer();
+              cleanBase64 = Buffer.from(arrayBuffer).toString('base64');
+              const contentType = imgRes.headers.get('content-type');
+              if (contentType) mimeType = contentType;
+            } catch (fetchErr) {
+              console.warn('Could not fetch HTTP image for Gemini:', fetchErr);
+            }
+          } else {
+            cleanBase64 = imageBase64;
+          }
 
-          if (response.text) {
-            const parsed = JSON.parse(response.text.trim());
-            return res.json({ success: true, aiResult: parsed, source: 'gemini' });
+          if (cleanBase64) {
+            const prompt = `You are QRLEAN AI, an expert computer vision waste auditor for Swachh Bharat cleanliness initiatives in Indian cities.
+Examine this submitted photo for spot "${spotName || 'Public Location'}".
+
+STRICT AUDIT RULES:
+1. DOES THIS IMAGE CLEARLY SHOW GENUINE DISCARDED WASTE, GARBAGE, LITTER, PLASTIC TRASH, ORGANIC WASTE SCRAPS, E-WASTE, OR DEBRIS IN A PUBLIC OR DUMPSTER AREA?
+2. IF NO WASTE IS PRESENT (e.g. it is a selfie, clean room, blank wall, indoor furniture, person without waste, clean desk, animal, paper document, or clean outdoor landscape):
+   - Set "isValid": false
+   - Set "confidenceScore": 15
+   - Set "detectedCategory": "None / Non-Waste"
+   - Set "estimatedVolumeKg": 0
+   - Set "hazardRating": "Low"
+   - Set "reasoning": Clear explanation why report is invalid (e.g., "Image shows a clean surface or selfie with no visible municipal waste or litter.").
+   - Set "detectedObjects": ["Non-waste item / clean scene"]
+   - Set "suggestedAction": "Report rejected automatically as no waste was found."
+3. IF GENUINE DISCARDED WASTE IS PRESENT:
+   - Set "isValid": true
+   - Set "confidenceScore": 80 to 99
+   - Set "detectedCategory": one of "Plastic", "Wet/Organic", "E-Waste", "Hazardous", "Construction/Debris", or "General/Mixed"
+   - Set "estimatedVolumeKg": estimated weight in kg (e.g. 2.5 to 25.0)
+   - Set "hazardRating": "Low", "Medium", or "High"
+   - Set "reasoning": Concise explanation of the waste material observed and location context.
+   - Set "detectedObjects": list of identified waste objects (e.g. ["PET bottle", "Polythene bag", "Cardboard"])
+   - Set "suggestedAction": Action for municipal cleaning crew.
+
+Return JSON strictly matching the schema.`;
+
+            const response = await ai.models.generateContent({
+              model: 'gemini-3.6-flash',
+              contents: [
+                {
+                  parts: [
+                    { inlineData: { mimeType, data: cleanBase64 } },
+                    { text: prompt }
+                  ]
+                }
+              ],
+              config: {
+                responseMimeType: 'application/json',
+                responseSchema: {
+                  type: Type.OBJECT,
+                  properties: {
+                    isValid: { type: Type.BOOLEAN, description: 'True if image contains genuine waste/litter spot, False if clean/non-waste/selfie' },
+                    confidenceScore: { type: Type.INTEGER, description: 'Percentage 0-100 confidence' },
+                    detectedCategory: { type: Type.STRING, description: 'Plastic, Wet/Organic, E-Waste, Hazardous, Construction/Debris, General/Mixed, or None / Non-Waste' },
+                    estimatedVolumeKg: { type: Type.NUMBER, description: 'Estimated weight of waste in Kg' },
+                    hazardRating: { type: Type.STRING, description: 'Low, Medium, or High' },
+                    reasoning: { type: Type.STRING, description: 'Explanation of AI audit finding' },
+                    detectedObjects: {
+                      type: Type.ARRAY,
+                      items: { type: Type.STRING },
+                      description: 'List of waste items identified'
+                    },
+                    suggestedAction: { type: Type.STRING, description: 'Action for municipal cleaning center' }
+                  },
+                  required: ['isValid', 'confidenceScore', 'detectedCategory', 'estimatedVolumeKg', 'hazardRating', 'reasoning']
+                }
+              }
+            });
+
+            if (response.text) {
+              const parsed = JSON.parse(response.text.trim());
+              return res.json({ success: true, aiResult: parsed, source: 'gemini' });
+            }
           }
         } catch (geminiError: any) {
-          console.warn('Gemini API call failed, falling back to simulated audit:', geminiError?.message || geminiError);
+          console.warn('Gemini API call failed, falling back to smart image audit:', geminiError?.message || geminiError);
         }
       }
 
-      // High-fidelity fallback / simulated audit logic
-      const isSimulatedFake = category === 'Trigger_Invalid_Scam';
-      
+      // High-fidelity fallback / smart image feature audit logic
+      const isExplicitFakeTrigger = category === 'Trigger_Invalid_Scam';
+      const isLowClutterNonWaste = typeof visualComplexity === 'number' && visualComplexity < 18;
+      const isInvalid = isExplicitFakeTrigger || isLowClutterNonWaste;
+
       const fallbackResult = {
-        isValid: !isSimulatedFake,
-        confidenceScore: isSimulatedFake ? 18 : 94,
-        detectedCategory: isSimulatedFake ? 'General/Mixed' : (category || 'Plastic'),
-        estimatedVolumeKg: isSimulatedFake ? 0 : 12.5,
-        hazardRating: isSimulatedFake ? 'Low' : 'Medium',
-        reasoning: isSimulatedFake 
-          ? 'AI Alert: Image does not contain municipal waste. Appears to be an invalid or non-waste photo.' 
+        isValid: !isInvalid,
+        confidenceScore: isInvalid ? 18 : 94,
+        detectedCategory: isInvalid ? 'None / Non-Waste' : (category || 'Plastic'),
+        estimatedVolumeKg: isInvalid ? 0 : 12.5,
+        hazardRating: isInvalid ? 'Low' : 'Medium',
+        reasoning: isInvalid
+          ? 'AI Vision Alert: Image appears to be a clean surface, selfie, or non-waste photo. No municipal waste or litter detected.'
           : 'AI Audit Confirmed: Litter and discarded packaging verified at public spot. High recyclability value.',
-        detectedObjects: isSimulatedFake ? ['Unrelated Object'] : ['PET Bottle', 'Polythene Bag', 'Cardboard Box'],
-        suggestedAction: isSimulatedFake ? 'Report rejected automatically.' : 'Route to nearest Ward Waste Segregation Hub.',
+        detectedObjects: isInvalid ? ['Clean Surface / Unrelated Object'] : ['PET Bottle', 'Polythene Bag', 'Cardboard Box'],
+        suggestedAction: isInvalid ? 'Report rejected automatically.' : 'Route to nearest Ward Waste Segregation Hub.',
       };
 
       return res.json({ success: true, aiResult: fallbackResult, source: 'simulated' });

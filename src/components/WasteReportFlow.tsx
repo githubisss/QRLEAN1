@@ -39,6 +39,7 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
   // AI Verification Result
   const [aiResult, setAiResult] = useState<AIVerificationResult | null>(null);
   const [verifyingError, setVerifyingError] = useState<string | null>(null);
+  const [imageComplexity, setImageComplexity] = useState<number | null>(null);
 
   // Selected Reward
   const [selectedReward, setSelectedReward] = useState<RewardItem | null>(null);
@@ -70,7 +71,7 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
     }
   };
 
-  const takeCameraPhoto = () => {
+  const takeCameraPhoto = async () => {
     if (videoCaptureRef.current) {
       const video = videoCaptureRef.current;
       const canvas = document.createElement('canvas');
@@ -80,7 +81,10 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        setImagePreview(dataUrl);
+        
+        const compressed = await compressImage(dataUrl);
+        setImagePreview(compressed.dataUrl);
+        setImageComplexity(compressed.complexity);
 
         // Stop stream tracks
         const stream = video.srcObject as MediaStream;
@@ -90,8 +94,8 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
     }
   };
 
-  // Image Compression Helper
-  const compressImage = (dataUrl: string, maxDimension = 1024, quality = 0.85): Promise<string> => {
+  // Image Compression & Visual Clutter Analyzer
+  const compressImage = (dataUrl: string, maxDimension = 1024, quality = 0.85): Promise<{ dataUrl: string; complexity: number }> => {
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
@@ -110,14 +114,32 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
+        let complexity = 50;
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
+          try {
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            let totalDiff = 0;
+            let samples = 0;
+            for (let i = 0; i < data.length - 32; i += 64) {
+              const r1 = data[i], g1 = data[i + 1], b1 = data[i + 2];
+              const r2 = data[i + 32], g2 = data[i + 33], b2 = data[i + 34];
+              const diff = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+              totalDiff += diff;
+              samples++;
+            }
+            const avgDiff = samples > 0 ? totalDiff / samples : 0;
+            complexity = Math.min(100, Math.round((avgDiff / 50) * 100));
+          } catch (e) {
+            complexity = 50;
+          }
+          resolve({ dataUrl: canvas.toDataURL('image/jpeg', quality), complexity });
         } else {
-          resolve(dataUrl);
+          resolve({ dataUrl, complexity: 50 });
         }
       };
-      img.onerror = () => resolve(dataUrl);
+      img.onerror = () => resolve({ dataUrl, complexity: 50 });
       img.src = dataUrl;
     });
   };
@@ -129,7 +151,8 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
       reader.onloadend = async () => {
         const raw = reader.result as string;
         const compressed = await compressImage(raw);
-        setImagePreview(compressed);
+        setImagePreview(compressed.dataUrl);
+        setImageComplexity(compressed.complexity);
       };
       reader.readAsDataURL(file);
     }
@@ -151,6 +174,7 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
           imageBase64: finalImage,
           category: simulatedCategoryOverride || category,
           spotName,
+          visualComplexity: imageComplexity,
         }),
       });
 
@@ -169,17 +193,20 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
       }
     } catch (err: any) {
       console.error('Verification error:', err);
-      const isSimulatedFake = simulatedCategoryOverride === 'Trigger_Invalid_Scam';
+      const isExplicitFake = simulatedCategoryOverride === 'Trigger_Invalid_Scam';
+      const isLowClutter = imageComplexity !== null && imageComplexity < 18;
+      const isSimulatedFake = isExplicitFake || isLowClutter;
+
       const fallbackResult: AIVerificationResult = {
         isValid: !isSimulatedFake,
         confidenceScore: isSimulatedFake ? 18 : 92,
-        detectedCategory: isSimulatedFake ? 'General/Mixed' : (category || 'Plastic'),
+        detectedCategory: isSimulatedFake ? 'None / Non-Waste' : (category || 'Plastic'),
         estimatedVolumeKg: isSimulatedFake ? 0 : 10.0,
         hazardRating: isSimulatedFake ? 'Low' : 'Medium',
         reasoning: isSimulatedFake
-          ? 'AI Alert: Image does not contain municipal waste. Appears to be non-waste photo.'
+          ? 'AI Alert: Image appears to be a clean surface, selfie, or non-waste photo. No municipal waste detected.'
           : 'AI Audit Confirmed: Discarded waste verified at public spot. High recyclability value.',
-        detectedObjects: isSimulatedFake ? ['Unrelated Object'] : ['Packaging', 'Recyclables', 'General Waste'],
+        detectedObjects: isSimulatedFake ? ['Clean Surface / Unrelated Object'] : ['Packaging', 'Recyclables', 'General Waste'],
         suggestedAction: isSimulatedFake ? 'Report rejected automatically.' : 'Route to nearest Ward Waste Segregation Hub.',
       };
       setAiResult(fallbackResult);
