@@ -4,11 +4,11 @@ import { LeaderboardUser } from '../types';
 
 interface LeaderboardViewProps {
   users: LeaderboardUser[];
-  activeLanguage: 'EN' | 'HI';
+  activeLanguage: 'EN' | 'TA';
 }
 
 export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ users, activeLanguage }) => {
-  const isHi = activeLanguage === 'HI';
+  const isTa = activeLanguage === 'TA';
 
   const [timeframe, setTimeframe] = useState<'weekly' | 'monthly'>('weekly');
   const [userTypeFilter, setUserTypeFilter] = useState<'all' | 'citizen' | 'household_donor'>('all');
@@ -35,10 +35,10 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ users, activeL
           <Trophy className="w-7 h-7" />
         </div>
         <h2 className="font-extrabold text-xl font-sans">
-          {isHi ? 'स्वच्छ लीडरबोर्ड (Swachh Rankings)' : 'Community Eco Leaderboard'}
+          {isTa ? 'தூய்மை தரவரிசை (Swachh Rankings)' : 'Community Eco Leaderboard'}
         </h2>
         <p className="text-xs text-emerald-200 mt-0.5">
-          {isHi ? 'शीर्ष नागरिक एवं दानदाताओं का सम्मान' : 'Honoring India’s top waste reporters and household donors'}
+          {isTa ? 'முன்னணி குடிமக்கள் மற்றும் நன்கொடையாளர்களைக் கௌரவித்தல்' : 'Honoring India’s top waste reporters and household donors'}
         </p>
 
         {/* Timeframe selector */}
@@ -49,7 +49,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ users, activeL
               timeframe === 'weekly' ? 'bg-emerald-500 text-white shadow-xs' : 'text-emerald-300 hover:text-white'
             }`}
           >
-            {isHi ? 'साप्ताहिक' : 'Weekly Top'}
+            {isTa ? 'வாராந்திர' : 'Weekly Top'}
           </button>
           <button
             onClick={() => setTimeframe('monthly')}
@@ -57,7 +57,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ users, activeL
               timeframe === 'monthly' ? 'bg-emerald-500 text-white shadow-xs' : 'text-emerald-300 hover:text-white'
             }`}
           >
-            {isHi ? 'मासिक' : 'Monthly All-Time'}
+            {isTa ? 'மாதாந்திர' : 'Monthly All-Time'}
           </button>
         </div>
       </div>

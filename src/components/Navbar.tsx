@@ -5,8 +5,8 @@ interface NavbarProps {
   userRole: 'citizen' | 'provider';
   setUserRole: (role: 'citizen' | 'provider') => void;
   userPoints: number;
-  activeLanguage: 'EN' | 'HI';
-  setActiveLanguage: (lang: 'EN' | 'HI') => void;
+  activeLanguage: 'EN' | 'TA';
+  setActiveLanguage: (lang: 'EN' | 'TA') => void;
   onOpenQRGenerator: () => void;
   onNavigateHome: () => void;
 }
@@ -41,7 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
             <p className="text-[10px] text-slate-500 font-medium">
-              {activeLanguage === 'HI' ? 'स्वच्छ भारत AI रिवार्ड्स' : 'Scan • AI Verify • Earn Rewards'}
+              {activeLanguage === 'TA' ? 'தூய்மை பாரதம் AI வெகுமதிகள்' : 'Scan • AI Verify • Earn Rewards'}
             </p>
           </div>
         </button>
@@ -91,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Language Switcher */}
           <button
-            onClick={() => setActiveLanguage(activeLanguage === 'EN' ? 'HI' : 'EN')}
+            onClick={() => setActiveLanguage(activeLanguage === 'EN' ? 'TA' : 'EN')}
             className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 rounded-md transition-colors"
           >
             <Languages className="w-3.5 h-3.5 text-emerald-600" />

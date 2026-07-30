@@ -4,11 +4,11 @@ import { ImpactStats } from '../types';
 
 interface ImpactViewProps {
   stats: ImpactStats;
-  activeLanguage: 'EN' | 'HI';
+  activeLanguage: 'EN' | 'TA';
 }
 
 export const ImpactView: React.FC<ImpactViewProps> = ({ stats, activeLanguage }) => {
-  const isHi = activeLanguage === 'HI';
+  const isTa = activeLanguage === 'TA';
 
   // Calculator state
   const [inputKg, setInputKg] = useState<number>(10);
@@ -27,10 +27,10 @@ export const ImpactView: React.FC<ImpactViewProps> = ({ stats, activeLanguage })
           RECYCLING & CIRCULAR IMPACT
         </span>
         <h2 className="font-extrabold text-xl mt-1.5 font-sans">
-          {isHi ? 'पर्यावरण एवं पुनर्चक्रण प्रभाव' : 'Clean India Impact Tracker'}
+          {isTa ? 'சுற்றுச்சூழல் மற்றும் மறுசுழற்சி தாக்கம்' : 'Clean India Impact Tracker'}
         </h2>
         <p className="text-xs text-emerald-200 mt-1">
-          {isHi ? 'कचरे से घर बनाने की भारत पहल' : 'Turning municipal waste into eco-bricks for affordable Indian housing'}
+          {isTa ? 'குப்பையிலிருந்து வீடு கட்டும் இந்திய முயற்சி' : 'Turning municipal waste into eco-bricks for affordable Indian housing'}
         </p>
       </div>
 
@@ -89,7 +89,7 @@ export const ImpactView: React.FC<ImpactViewProps> = ({ stats, activeLanguage })
       <div className="bg-white border border-emerald-200 rounded-2xl p-4 space-y-3 shadow-xs">
         <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
           <Calculator className="w-5 h-5 text-emerald-600" />
-          <h3>{isHi ? 'कचरा से ईंट कैलकुलेटर' : 'Personal Waste Impact Calculator'}</h3>
+          <h3>{isTa ? 'குப்பை முதல் செங்கல் கணக்கிடுவான்' : 'Personal Waste Impact Calculator'}</h3>
         </div>
 
         <p className="text-xs text-slate-600">

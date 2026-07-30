@@ -14,7 +14,7 @@ import { WasteReport, RewardItem, Provider, LeaderboardUser, ImpactStats } from 
 export default function App() {
   const [userRole, setUserRole] = useState<'citizen' | 'provider'>('citizen');
   const [activeTab, setActiveTab] = useState<'home' | 'scan' | 'rewards' | 'leaderboard' | 'impact'>('home');
-  const [activeLanguage, setActiveLanguage] = useState<'EN' | 'HI'>('EN');
+  const [activeLanguage, setActiveLanguage] = useState<'EN' | 'TA'>('EN');
   const [userPoints, setUserPoints] = useState<number>(280);
 
   // Data states
@@ -233,10 +233,10 @@ export default function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="font-extrabold text-lg text-slate-900 font-sans">
-                        {activeLanguage === 'HI' ? 'उपलब्ध पुरस्कार' : 'Rewards Marketplace'}
+                        {activeLanguage === 'TA' ? 'கிடைக்கும் பரிசுகள்' : 'Rewards Marketplace'}
                       </h2>
                       <p className="text-xs text-slate-500">
-                        {activeLanguage === 'HI' ? 'इको-अंकों से पुरस्कार भुनाएं' : 'Redeem your points for cash, meals, or store coupons'}
+                        {activeLanguage === 'TA' ? 'புள்ளிகளைப் பயன்படுத்தி பரிசுகளைப் பெறுங்கள்' : 'Redeem your points for cash, meals, or store coupons'}
                       </p>
                     </div>
                     <button

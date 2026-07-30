@@ -10,7 +10,7 @@ interface HomeScreenProps {
   onOpenImpact: () => void;
   recentReports: WasteReport[];
   userPoints: number;
-  activeLanguage: 'EN' | 'HI';
+  activeLanguage: 'EN' | 'TA';
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -23,7 +23,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   userPoints,
   activeLanguage,
 }) => {
-  const isHi = activeLanguage === 'HI';
+  const isTa = activeLanguage === 'TA';
 
   return (
     <div className="max-w-md mx-auto p-4 pb-24 space-y-4">
@@ -48,15 +48,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div>
             <h1 className="text-2xl font-black tracking-tight text-white leading-tight font-sans">
-              {isHi ? 'कचरा रिपोर्ट करें, ' : 'Clean Your Neighborhood. '}
+              {isTa ? 'குப்பைகளை புகாரளிக்கவும், ' : 'Clean Your Neighborhood. '}
               <br />
               <span className="text-amber-300">
-                {isHi ? 'पाएं नगद और कूपन!' : 'Earn Money & Rewards!'}
+                {isTa ? 'பணம் மற்றும் கூப்பன்களை வெல்லுங்கள்!' : 'Earn Money & Rewards!'}
               </span>
             </h1>
             <p className="text-xs text-emerald-100 mt-1 max-w-xs font-medium">
-              {isHi
-                ? 'QR स्कैन करें -> AI सत्यापन -> निकटतम सफाई केंद्र को सूचना -> पाएँ मुफ्त भोजन या UPI कैश!'
+              {isTa
+                ? 'QR ஸ்கேன் செய் -> AI சரிபார்ப்பு -> துப்புரவு மையம் -> இலவச உணவு அல்லது UPI ரொக்கம்!'
                 : 'Scan spot QR stickers, get instant AI waste verification, and redeem food, UPI cash, or grocery coupons.'}
             </p>
           </div>
@@ -67,7 +67,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-sm rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
           >
             <QrCode className="w-5 h-5 stroke-[2.5]" />
-            <span>{isHi ? 'कैमरे से QR कोड स्कैन करें' : 'Scan Spot QR Code Now'}</span>
+            <span>{isTa ? 'கேமரா மூலம் QR குறியீட்டை ஸ்கேன் செய்' : 'Scan Spot QR Code Now'}</span>
           </button>
         </div>
       </div>
@@ -75,7 +75,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {/* 5 MAIN NAVIGATION BUTTONS REQUIRED BY SPEC */}
       <div className="space-y-2">
         <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
-          {isHi ? 'मुख्य सेवाएं' : 'Quick Actions & Flow'}
+          {isTa ? 'முக்கிய சேவைகள்' : 'Quick Actions & Flow'}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -88,8 +88,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <QrCode className="w-5 h-5" />
             </div>
             <div className="text-left mt-2">
-              <div className="font-extrabold text-sm">{isHi ? '1. Scan QR Code' : '1. Scan QR Code'}</div>
-              <div className="text-[10px] text-emerald-100">{isHi ? 'कैमरा खोलें' : 'Open camera scanner'}</div>
+              <div className="font-extrabold text-sm">{isTa ? '1. Scan QR Code' : '1. Scan QR Code'}</div>
+              <div className="text-[10px] text-emerald-100">{isTa ? 'கேமராவை திற' : 'Open camera scanner'}</div>
             </div>
           </button>
 
@@ -102,8 +102,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <Globe className="w-5 h-5" />
             </div>
             <div className="text-left mt-2">
-              <div className="font-extrabold text-sm">{isHi ? '2. Report via Web' : '2. Report via Web'}</div>
-              <div className="text-[10px] text-slate-500">{isHi ? 'बिना QR के रिपोर्ट' : 'Manual photo report'}</div>
+              <div className="font-extrabold text-sm">{isTa ? '2. Report via Web' : '2. Report via Web'}</div>
+              <div className="text-[10px] text-slate-500">{isTa ? 'QR இல்லாமல் புகார்' : 'Manual photo report'}</div>
             </div>
           </button>
 
@@ -116,8 +116,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <Trophy className="w-5 h-5" />
             </div>
             <div className="text-left mt-2">
-              <div className="font-extrabold text-sm">{isHi ? '3. Leaderboard' : '3. Leaderboard'}</div>
-              <div className="text-[10px] text-slate-500">{isHi ? 'रैंकिंग देखें' : 'Rankings & Badges'}</div>
+              <div className="font-extrabold text-sm">{isTa ? '3. Leaderboard' : '3. Leaderboard'}</div>
+              <div className="text-[10px] text-slate-500">{isTa ? 'தரவரிசையை பார்' : 'Rankings & Badges'}</div>
             </div>
           </button>
 
@@ -130,8 +130,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <Gift className="w-5 h-5" />
             </div>
             <div className="text-left mt-2">
-              <div className="font-extrabold text-sm">{isHi ? '4. My Rewards' : '4. My Rewards'}</div>
-              <div className="text-[10px] text-slate-500">{isHi ? 'नगद, भोजन, कूपन' : 'UPI, Food, Vouchers'}</div>
+              <div className="font-extrabold text-sm">{isTa ? '4. My Rewards' : '4. My Rewards'}</div>
+              <div className="text-[10px] text-slate-500">{isTa ? 'பணம், உணவு, கூப்பன்' : 'UPI, Food, Vouchers'}</div>
             </div>
           </button>
         </div>
@@ -169,7 +169,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
           <div className="text-xs font-bold text-slate-800">
-            {isHi ? 'हाल ही की नागरिक रिपोर्ट' : 'Recent Neighborhood Reports'}
+            {isTa ? 'சமீபத்திய குடிமக்கள் புகார்கள்' : 'Recent Neighborhood Reports'}
           </div>
           <span className="text-[10px] text-emerald-700 font-semibold">Swachh Control Live</span>
         </div>

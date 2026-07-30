@@ -5,7 +5,7 @@ interface BottomNavProps {
   activeTab: 'home' | 'scan' | 'rewards' | 'leaderboard' | 'impact';
   setActiveTab: (tab: 'home' | 'scan' | 'rewards' | 'leaderboard' | 'impact') => void;
   onOpenScan: () => void;
-  activeLanguage: 'EN' | 'HI';
+  activeLanguage: 'EN' | 'TA';
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({
@@ -14,7 +14,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   onOpenScan,
   activeLanguage,
 }) => {
-  const isHi = activeLanguage === 'HI';
+  const isTa = activeLanguage === 'TA';
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg">
@@ -27,7 +27,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           }`}
         >
           <Home className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">{isHi ? 'होम' : 'Home'}</span>
+          <span className="text-[10px] mt-0.5">{isTa ? 'முகப்பு' : 'Home'}</span>
         </button>
 
         {/* Rewards */}
@@ -38,7 +38,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           }`}
         >
           <Gift className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">{isHi ? 'पुरस्कार' : 'Rewards'}</span>
+          <span className="text-[10px] mt-0.5">{isTa ? 'பரிசுகள்' : 'Rewards'}</span>
         </button>
 
         {/* Middle Floating QR Camera Scanner FAB */}
@@ -61,7 +61,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           }`}
         >
           <Trophy className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">{isHi ? 'रैंकिंग' : 'Leaderboard'}</span>
+          <span className="text-[10px] mt-0.5">{isTa ? 'தரவரிசை' : 'Leaderboard'}</span>
         </button>
 
         {/* Impact */}
@@ -72,7 +72,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           }`}
         >
           <Leaf className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5">{isHi ? 'प्रभाव' : 'Impact'}</span>
+          <span className="text-[10px] mt-0.5">{isTa ? 'தாக்கம்' : 'Impact'}</span>
         </button>
       </div>
     </div>

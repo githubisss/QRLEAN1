@@ -8,7 +8,7 @@ interface ProviderPortalProps {
   onAddReward: (rewardData: any) => void;
   onToggleAvailability: (rewardId: string, isAvailable: boolean) => void;
   onRegisterProvider: (providerData: any) => void;
-  activeLanguage: 'EN' | 'HI';
+  activeLanguage: 'EN' | 'TA';
 }
 
 export const ProviderPortal: React.FC<ProviderPortalProps> = ({
@@ -19,7 +19,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
   onRegisterProvider,
   activeLanguage,
 }) => {
-  const isHi = activeLanguage === 'HI';
+  const isTa = activeLanguage === 'TA';
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'inventory' | 'ad_exchange' | 'register'>('dashboard');
   const [selectedProviderId, setSelectedProviderId] = useState<string>(providers[0]?.id || '');
@@ -61,7 +61,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
 
     setNewTitle('');
     setNewDesc('');
-    alert(isHi ? 'पुरस्कार सफलतापूर्वक जोड़ा गया!' : 'New Reward Item Published Successfully!');
+    alert(isTa ? 'பரிசு வெற்றிகரமாக சேர்க்கப்பட்டது!' : 'New Reward Item Published Successfully!');
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
@@ -78,7 +78,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
 
     setRegName('');
     setActiveTab('dashboard');
-    alert(isHi ? 'प्रदाता पंजीकरण सफल!' : 'Provider Registered Successfully!');
+    alert(isTa ? 'வழங்குநர் பதிவு வெற்றி!' : 'Provider Registered Successfully!');
   };
 
   return (
@@ -95,7 +95,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
                 PARTNER PORTAL
               </span>
               <h2 className="font-extrabold text-lg leading-tight">
-                {isHi ? 'दुकानदार एवं दानदाता पोर्टल' : 'Provider & Donor Exchange'}
+                {isTa ? 'கடைக்காரர் & நன்கொடையாளர் தளம்' : 'Provider & Donor Exchange'}
               </h2>
             </div>
           </div>
@@ -105,7 +105,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
             className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1"
           >
             <UserPlus className="w-3.5 h-3.5" />
-            <span>{isHi ? '+ जुड़ें' : '+ Register'}</span>
+            <span>{isTa ? '+ சேரவும்' : '+ Register'}</span>
           </button>
         </div>
 
@@ -136,7 +136,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
             activeTab === 'dashboard' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600'
           }`}
         >
-          {isHi ? 'डैशबोर्ड' : 'Dashboard'}
+          {isTa ? 'தகவல் பலகை' : 'Dashboard'}
         </button>
         <button
           onClick={() => setActiveTab('inventory')}
@@ -144,7 +144,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
             activeTab === 'inventory' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600'
           }`}
         >
-          {isHi ? '+ वस्तु जोड़ें' : '+ Add Item'}
+          {isTa ? '+ பொருளைச் சேர்' : '+ Add Item'}
         </button>
         <button
           onClick={() => setActiveTab('ad_exchange')}
@@ -152,7 +152,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
             activeTab === 'ad_exchange' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600'
           }`}
         >
-          {isHi ? 'विज्ञापन क्रेडिट' : 'Ad Exchange'}
+          {isTa ? 'விளம்பர கடன்' : 'Ad Exchange'}
         </button>
       </div>
 
@@ -195,7 +195,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
           {/* Manage Inventory Status (Available vs Out of Stock) */}
           <div className="space-y-2">
             <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider">
-              {isHi ? 'उपलब्धता स्थिति (Availability Toggle)' : 'Manage Item Availability'}
+              {isTa ? 'இருப்பு நிலை' : 'Manage Item Availability'}
             </h3>
 
             {providerRewards.length === 0 ? (
@@ -247,7 +247,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
       {activeTab === 'inventory' && (
         <form onSubmit={handleCreateRewardSubmit} className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-xs">
           <h3 className="font-bold text-slate-900 text-sm border-b pb-2">
-            {isHi ? 'नया पुरस्कार आइटम जोड़ें' : 'Add Item to Provide (Sponsor Reward)'}
+            {isTa ? 'புதிய பரிசுப் பொருளைச் சேர்' : 'Add Item to Provide (Sponsor Reward)'}
           </h3>
 
           <div>
@@ -325,7 +325,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
             className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
-            <span>{isHi ? 'पुरस्कार प्रकाशित करें' : 'Publish Reward Item'}</span>
+            <span>{isTa ? 'பரிசை வெளியிடு' : 'Publish Reward Item'}</span>
           </button>
         </form>
       )}
@@ -336,7 +336,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
           <div className="flex items-center gap-2 text-emerald-800">
             <Megaphone className="w-5 h-5 text-emerald-600" />
             <h3 className="font-bold text-sm">
-              {isHi ? 'विज्ञापन विनिमय एवं ब्रांड प्रमोशन' : 'QRLEAN Sponsor Ad Exchange'}
+              {isTa ? 'விளம்பரம் மற்றும் பிராண்ட் விளம்பரம்' : 'QRLEAN Sponsor Ad Exchange'}
             </h3>
           </div>
 
@@ -369,7 +369,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
       {activeTab === 'register' && (
         <form onSubmit={handleRegisterSubmit} className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-xs">
           <h3 className="font-bold text-slate-900 text-sm border-b pb-2">
-            {isHi ? 'नया प्रदाता या दानदाता खाता बनाएं' : 'Register as Provider or Household Donor'}
+            {isTa ? 'புதிய கணக்கை உருவாக்கவும்' : 'Register as Provider or Household Donor'}
           </h3>
 
           <div>
@@ -428,7 +428,7 @@ export const ProviderPortal: React.FC<ProviderPortalProps> = ({
             type="submit"
             className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md"
           >
-            {isHi ? 'रजिस्टर करें' : 'Complete Registration'}
+            {isTa ? 'பதிவு செய்' : 'Complete Registration'}
           </button>
         </form>
       )}

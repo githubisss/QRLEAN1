@@ -5,7 +5,7 @@ import { SAMPLE_QR_SPOTS } from '../data/mockData';
 interface QRGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  activeLanguage: 'EN' | 'HI';
+  activeLanguage: 'EN' | 'TA';
 }
 
 export const QRGeneratorModal: React.FC<QRGeneratorModalProps> = ({
@@ -43,7 +43,7 @@ export const QRGeneratorModal: React.FC<QRGeneratorModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-slate-900 text-sm">
-                {activeLanguage === 'HI' ? 'क्यूआर कोड जनरेटर' : 'Printable QR Code Generator'}
+                {activeLanguage === 'TA' ? 'QR குறியீடு ஆக்கி' : 'Printable QR Code Generator'}
               </h3>
               <p className="text-[11px] text-slate-500">For municipal spots or pitch demo testing</p>
             </div>

@@ -7,7 +7,7 @@ interface LiveQRScannerProps {
   isOpen: boolean;
   onClose: () => void;
   onQRScanned: (spotData: { spotId: string; spotName: string; locationAddress: string; city: string }) => void;
-  activeLanguage: 'EN' | 'HI';
+  activeLanguage: 'EN' | 'TA';
 }
 
 export const LiveQRScanner: React.FC<LiveQRScannerProps> = ({
@@ -34,7 +34,7 @@ export const LiveQRScanner: React.FC<LiveQRScannerProps> = ({
     if (isOpen) {
       setCameraError(null);
       setScannedSpot(null);
-      setScanStatusText(activeLanguage === 'HI' ? 'QR कोड को फ्रेम में लाएं' : 'Align QR code inside frame');
+      setScanStatusText(activeLanguage === 'TA' ? 'QR குறியீட்டை சட்டகத்தில் வைக்கவும்' : 'Align QR code inside frame');
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setCameraActive(false);
@@ -209,10 +209,10 @@ export const LiveQRScanner: React.FC<LiveQRScannerProps> = ({
           </div>
           <div>
             <h2 className="font-bold text-base text-white font-sans">
-              {activeLanguage === 'HI' ? 'QR कोड स्कैन करें' : 'Live Camera QR Scanner'}
+              {activeLanguage === 'TA' ? 'QR குறியீட்டை ஸ்கேன் செய்' : 'Live Camera QR Scanner'}
             </h2>
             <p className="text-xs text-slate-400">
-              {activeLanguage === 'HI' ? 'कचरा स्थल QR कोड पर कैमरा लाएं' : 'Point camera at QR sticker pasted on waste spot'}
+              {activeLanguage === 'TA' ? 'குப்பை இடத்தின் QR குறியீட்டின் மீது கேமராவை வைக்கவும்' : 'Point camera at QR sticker pasted on waste spot'}
             </p>
           </div>
         </div>
@@ -282,7 +282,7 @@ export const LiveQRScanner: React.FC<LiveQRScannerProps> = ({
             </div>
             <div>
               <h3 className="text-white font-bold text-base mb-1">
-                {activeLanguage === 'HI' ? 'कैमरा एक्सेस प्रतिबंधित' : 'Camera Access Restricted'}
+                {activeLanguage === 'TA' ? 'கேமரா அனுமதி தேவை' : 'Camera Access Restricted'}
               </h3>
               <p className="text-xs text-slate-300 max-w-xs mx-auto">
                 {cameraError}
@@ -295,7 +295,7 @@ export const LiveQRScanner: React.FC<LiveQRScannerProps> = ({
                 className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2"
               >
                 <Upload className="w-4 h-4" />
-                <span>{activeLanguage === 'HI' ? 'QR फोटो अपलोड करें' : 'Upload QR Image / Photo'}</span>
+                <span>{activeLanguage === 'TA' ? 'QR படத்தைப் பதிவேற்றவும்' : 'Upload QR Image / Photo'}</span>
               </button>
 
               <button
@@ -306,12 +306,12 @@ export const LiveQRScanner: React.FC<LiveQRScannerProps> = ({
                 className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center justify-center gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
-                <span>{activeLanguage === 'HI' ? 'पुनः प्रयास करें' : 'Retry Camera'}</span>
+                <span>{activeLanguage === 'TA' ? 'மீண்டும் முயற்சி செய்' : 'Retry Camera'}</span>
               </button>
             </div>
 
             <p className="text-[11px] text-emerald-400 font-medium">
-              {activeLanguage === 'HI' ? 'या नीचे दिए गए डेमो स्थानों को चुनें 👇' : 'Or select a location spot from the demo simulator below 👇'}
+              {activeLanguage === 'TA' ? 'அல்லது கீழே உள்ள டெமோ இடங்களைத் தேர்ந்தெடுக்கவும் 👇' : 'Or select a location spot from the demo simulator below 👇'}
             </p>
 
             <input
@@ -330,7 +330,7 @@ export const LiveQRScanner: React.FC<LiveQRScannerProps> = ({
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
             <Sparkles className="w-3 h-3 text-amber-400" />
-            {activeLanguage === 'HI' ? 'त्वरित परीक्षण (डेमो स्पॉट)' : 'Demo QR Spot Simulator'}
+            {activeLanguage === 'TA' ? 'டெமோ இடம் (மாதிரி)' : 'Demo QR Spot Simulator'}
           </span>
           <span className="text-[10px] text-slate-400">Click to auto-scan spot</span>
         </div>
