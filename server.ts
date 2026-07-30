@@ -1,19 +1,15 @@
 import express from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
 import { INITIAL_IMPACT_STATS, INITIAL_REWARDS, INITIAL_PROVIDERS, INITIAL_LEADERBOARD, INITIAL_REPORTS } from './src/data/mockData.js';
 import { WasteReport, RewardItem, Provider, LeaderboardUser } from './src/types.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json({ limit: '10mb' }));
+  app.use(express.json({ limit: '20mb' }));
 
   // In-memory application state
   let reports: WasteReport[] = [...INITIAL_REPORTS];
@@ -49,11 +45,14 @@ async function startServer() {
       const { imageBase64, category, spotName } = req.body;
       const ai = getGeminiClient();
 
-      if (ai && imageBase64) {
-        // Strip data:image prefix if present
-        const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+      if (ai && imageBase64 && typeof imageBase64 === 'string') {
+        try {
+          // Extract exact mime type (png, jpeg, webp, etc.)
+          const mimeTypeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
+          const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
+          const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
 
-        const prompt = `You are QRLEAN AI, an automated waste auditing model for Swachh Bharat cleanliness initiatives in Indian cities.
+          const prompt = `You are QRLEAN AI, an automated waste auditing model for Swachh Bharat cleanliness initiatives in Indian cities.
 Analyze this submitted photo for spot "${spotName || 'Public Location'}".
 1. Check if the image clearly shows genuine discarded waste/garbage/litter in a public area or waste bin area.
 2. If it is an invalid image (e.g. a selfie, blank wall, indoor furniture, animal, food on a plate, or scam photo), set isValid to false.
@@ -63,42 +62,45 @@ Analyze this submitted photo for spot "${spotName || 'Public Location'}".
 6. Provide concise reasoning in English with Indian urban context.
 7. Return JSON strictly matching the schema.`;
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
-          contents: [
-            {
-              parts: [
-                { inlineData: { mimeType: 'image/jpeg', data: cleanBase64 } },
-                { text: prompt }
-              ]
-            }
-          ],
-          config: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                isValid: { type: Type.BOOLEAN, description: 'True if image contains genuine outdoor/public waste spot' },
-                confidenceScore: { type: Type.INTEGER, description: 'Percentage 0-100 confidence' },
-                detectedCategory: { type: Type.STRING, description: 'Plastic, Wet/Organic, E-Waste, Hazardous, Construction/Debris, or General/Mixed' },
-                estimatedVolumeKg: { type: Type.NUMBER, description: 'Estimated weight of waste in Kg' },
-                hazardRating: { type: Type.STRING, description: 'Low, Medium, or High' },
-                reasoning: { type: Type.STRING, description: 'Explanation of AI audit finding' },
-                detectedObjects: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                  description: 'List of waste items identified'
+          const response = await ai.models.generateContent({
+            model: 'gemini-3.6-flash',
+            contents: [
+              {
+                parts: [
+                  { inlineData: { mimeType, data: cleanBase64 } },
+                  { text: prompt }
+                ]
+              }
+            ],
+            config: {
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  isValid: { type: Type.BOOLEAN, description: 'True if image contains genuine outdoor/public waste spot' },
+                  confidenceScore: { type: Type.INTEGER, description: 'Percentage 0-100 confidence' },
+                  detectedCategory: { type: Type.STRING, description: 'Plastic, Wet/Organic, E-Waste, Hazardous, Construction/Debris, or General/Mixed' },
+                  estimatedVolumeKg: { type: Type.NUMBER, description: 'Estimated weight of waste in Kg' },
+                  hazardRating: { type: Type.STRING, description: 'Low, Medium, or High' },
+                  reasoning: { type: Type.STRING, description: 'Explanation of AI audit finding' },
+                  detectedObjects: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: 'List of waste items identified'
+                  },
+                  suggestedAction: { type: Type.STRING, description: 'Action for municipal cleaning center' }
                 },
-                suggestedAction: { type: Type.STRING, description: 'Action for municipal cleaning center' }
-              },
-              required: ['isValid', 'confidenceScore', 'detectedCategory', 'estimatedVolumeKg', 'hazardRating', 'reasoning']
+                required: ['isValid', 'confidenceScore', 'detectedCategory', 'estimatedVolumeKg', 'hazardRating', 'reasoning']
+              }
             }
-          }
-        });
+          });
 
-        if (response.text) {
-          const parsed = JSON.parse(response.text.trim());
-          return res.json({ success: true, aiResult: parsed, source: 'gemini' });
+          if (response.text) {
+            const parsed = JSON.parse(response.text.trim());
+            return res.json({ success: true, aiResult: parsed, source: 'gemini' });
+          }
+        } catch (geminiError: any) {
+          console.warn('Gemini API call failed, falling back to simulated audit:', geminiError?.message || geminiError);
         }
       }
 
