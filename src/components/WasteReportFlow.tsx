@@ -44,6 +44,7 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
   const [selectedReward, setSelectedReward] = useState<RewardItem | null>(null);
   const [rewardCategoryFilter, setRewardCategoryFilter] = useState<RewardType | 'All'>('All');
   const [upiId, setUpiId] = useState('rohith@upi');
+  const [isSubmittingReward, setIsSubmittingReward] = useState(false);
 
   // Final Confirmation Data
   const [finalReportData, setFinalReportData] = useState<any | null>(null);
@@ -192,10 +193,46 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
 
   // Final Submit & Reward Confirmation
   const handleConfirmReward = async () => {
-    if (!selectedReward) return;
+    if (!selectedReward || isSubmittingReward) return;
 
+    setIsSubmittingReward(true);
+
+    const points = aiResult?.isValid ? 150 : 0;
+    const reportObj = {
+      id: `REP-${Math.floor(1000 + Math.random() * 9000)}`,
+      spotName: spotName || 'Public Spot',
+      locationAddress: locationAddress || 'Local Ward Area',
+      city: city || 'Bengaluru',
+      coordinates: { lat: 12.9716, lng: 77.5946 },
+      category: category || 'Plastic',
+      imageUrl: imagePreview || 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=600&auto=format&fit=crop&q=80',
+      status: 'Dispatched to Swachh Control',
+      aiResult: aiResult || undefined,
+      pointsEarned: points,
+      selectedReward,
+      sponsoredBy: selectedReward?.providerName || 'Swachh Partner Network',
+      createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' Today',
+      reporterName: 'Swachh Citizen',
+      upiId,
+    };
+
+    // Transition instantly so user experiences 0ms delay
+    setFinalReportData(reportObj);
+    setStep('confirmation');
+
+    // Trigger Confetti!
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#059669', '#10b981', '#34d399', '#fbbf24'],
+    });
+
+    onCompleteReport(reportObj);
+
+    // Sync to backend asynchronously
     try {
-      const res = await fetch('/api/report', {
+      await fetch('/api/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -210,24 +247,10 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
           reporterName: 'Swachh Citizen',
         }),
       });
-
-      const data = await res.json();
-      if (data.success) {
-        setFinalReportData(data.report);
-        setStep('confirmation');
-
-        // Trigger Confetti!
-        confetti({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#059669', '#10b981', '#34d399', '#fbbf24'],
-        });
-
-        onCompleteReport(data.report);
-      }
     } catch (err) {
-      console.error('Error submitting final report:', err);
+      console.warn('Background report save warning:', err);
+    } finally {
+      setIsSubmittingReward(false);
     }
   };
 
@@ -640,16 +663,25 @@ export const WasteReportFlow: React.FC<WasteReportFlowProps> = ({
 
           {/* Submit Button */}
           <button
-            disabled={!selectedReward}
+            disabled={!selectedReward || isSubmittingReward}
             onClick={handleConfirmReward}
-            className={`w-full py-3 font-bold text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all ${
-              selectedReward
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+            className={`w-full py-3.5 font-bold text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition-all ${
+              selectedReward && !isSubmittingReward
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer active:scale-[0.98]'
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed'
             }`}
           >
-            <span>{isHi ? 'पुरस्कार की पुष्टि करें' : 'Confirm Selected Reward'}</span>
-            <ArrowRight className="w-4 h-4" />
+            {isSubmittingReward ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                <span>{isHi ? 'पुष्टि हो रही है...' : 'Confirming & Dispatching...'}</span>
+              </>
+            ) : (
+              <>
+                <span>{isHi ? 'पुरस्कार की पुष्टि करें' : 'Confirm Selected Reward'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       )}
